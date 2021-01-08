@@ -53,7 +53,7 @@ do_check_acl(ClientInfo, PubSub, Topic, _AclResult,
             end;
         {ok, Rules} ->
             RulesWithDefault = Rules ++ DefaultPatterns,
-            case match(ClientInfo, PubSub, Topic, Rules) of
+            case match(ClientInfo, PubSub, Topic, RulesWithDefault) of
                 allow   -> {stop, allow};
                 nomatch -> {stop, deny}
             end;
