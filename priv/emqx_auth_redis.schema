@@ -149,7 +149,7 @@ end}.
     end
   end,
   DefaultPatterns = cuttlefish:conf_get("auth.redis.default_pattern", Conf),
-  TopicAccesses = string:split(DefaultPatterns, ",", trailing),
+  TopicAccesses = string:split(DefaultPatterns, ",", all),
   TopicRules = case TopicAccesses of
     [] -> [];
     _ -> [TopicRule || S1 <- TopicAccesses, TopicRule <- Fun(S1)]
