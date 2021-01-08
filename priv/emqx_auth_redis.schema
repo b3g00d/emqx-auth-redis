@@ -145,7 +145,7 @@ end}.
 {translation, "emqx_auth_redis.default_pattern", fun(Conf) ->
   Fun = fun(S) ->
     case string:split(S, "|", trailing) of
-      [Topic, Access] -> {Topic, list_to_binary(Access)}
+      [Topic, Access] -> [Topic, list_to_binary(Access)]
     end
   end,
   DefaultPatterns = cuttlefish:conf_get("auth.redis.default_pattern", Conf),
