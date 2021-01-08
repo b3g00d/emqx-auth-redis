@@ -152,7 +152,7 @@ end}.
   TopicAccesses = string:split(DefaultPatterns, ",", trailing),
   TopicRules = case TopicAccesses of
     [] -> [];
-    _ -> [Fun(S1) || S1 <- TopicAccesses]
+    _ -> [TopicRule || S1 <- TopicAccesses, TopicRule <- Fun(S1)]
   end,
   TopicRules
 end}.
