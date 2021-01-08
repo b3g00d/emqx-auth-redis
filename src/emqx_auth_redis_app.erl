@@ -56,7 +56,7 @@ load_acl_hook(AclCmd) ->
     {ok, Timeout} = application:get_env(?APP, query_timeout),
 
     %% Set cái này trong file config để load phía sau, giống file nhưng nên priorty default sẽ theo sau.
-    {ok, DefaultPatterns} = application:get_env(?APP, default_pattern, []),
+    DefaultPatterns = application:get_env(?APP, default_pattern, []),
     Type = proplists:get_value(type, application:get_env(?APP, server, [])),
     Config = #{acl_cmd => AclCmd,
                timeout => Timeout,
