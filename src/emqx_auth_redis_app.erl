@@ -56,8 +56,7 @@ load_acl_hook(AclCmd) ->
     {ok, Timeout} = application:get_env(?APP, query_timeout),
 
     %% Set cái này trong file config để load phía sau, giống file nhưng nên priorty default sẽ theo sau.
-    {ok, StringPatterns} = application:get_env(?APP, default_pattern, []),
-    DefaultPatterns = load_default_pattern(StringPatterns),
+    {ok, DefaultPatterns} = application:get_env(?APP, default_pattern, []),
     Type = proplists:get_value(type, application:get_env(?APP, server, [])),
     Config = #{acl_cmd => AclCmd,
                timeout => Timeout,
@@ -72,15 +71,3 @@ if_cmd_enabled(Par, Fun) ->
         {ok, Cmd} -> Fun(Cmd);
         undefined -> ok
     end.
-
-load_default_pattern([]) -> [];
-load_default_pattern(Patterns) ->
-    parse_topic_and_access(string:tokens(Patterns, ",")).
-
-%% vì thằng redis trả về binary phần access
-parse_topic_and_access(Patterns) -> parse_topic_and_access(Patterns, []).
-
-parse_topic_and_access([TopicAccess|Other], Result) ->
-    [Topic, Access] = string:tokens(TopicAccess, "|"),
-    parse_topic_and_access(Other, Result ++ [Topic, list_to_binary(Access)]);
-parse_topic_and_access([], Result) -> Result.
