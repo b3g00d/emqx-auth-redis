@@ -23,7 +23,7 @@
 -include("emqx_auth_redis.hrl").
 
 -export([ start/2
-        , stop/1
+          , stop/1
         ]).
 
 start(_StartType, _StartArgs) ->
@@ -54,10 +54,15 @@ load_auth_hook(AuthCmd) ->
 
 load_acl_hook(AclCmd) ->
     {ok, Timeout} = application:get_env(?APP, query_timeout),
+
+    %% Set cái này trong file config để load phía sau, giống file nhưng nên priorty default sẽ theo sau.
+    {ok, StringPatterns} = application:get_env(?APP, default_pattern, []),
+    DefaultPatterns = load_default_pattern(StringPatterns),
     Type = proplists:get_value(type, application:get_env(?APP, server, [])),
     Config = #{acl_cmd => AclCmd,
                timeout => Timeout,
                type => Type,
+               default_pattern => DefaultPatterns,
                pool => ?APP},
     ok = emqx_acl_redis:register_metrics(),
     emqx:hook('client.check_acl', fun emqx_acl_redis:check_acl/5, [Config]).
@@ -68,3 +73,14 @@ if_cmd_enabled(Par, Fun) ->
         undefined -> ok
     end.
 
+load_default_pattern([]) -> [];
+load_default_pattern(Patterns) ->
+    parse_topic_and_access(string:tokens(Patterns, ",")).
+
+%% vì thằng redis trả về binary phần access
+parse_topic_and_access(Patterns) -> parse_topic_and_access(Patterns, []).
+
+parse_topic_and_access([TopicAccess|Other], Result) ->
+    [Topic, Access] = string:tokens(TopicAccess, "|"),
+    parse_topic_and_access(Other, Result ++ [Topic, list_to_binary(Access)]);
+parse_topic_and_access([], Result) -> Result.

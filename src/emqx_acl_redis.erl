@@ -22,8 +22,8 @@
 -include_lib("emqx/include/logger.hrl").
 
 -export([ register_metrics/0
-        , check_acl/5
-        , description/0
+          , check_acl/5
+          , description/0
         ]).
 
 -spec(register_metrics() -> ok).
@@ -40,10 +40,19 @@ check_acl(ClientInfo, PubSub, Topic, AclResult, Config) ->
 do_check_acl(#{username := <<$$, _/binary>>}, _PubSub, _Topic, _AclResult, _Config) ->
     ok;
 do_check_acl(ClientInfo, PubSub, Topic, _AclResult,
-             #{acl_cmd := AclCmd, timeout := Timeout, type := Type, pool := Pool}) ->
+             #{acl_cmd := AclCmd, 
+               timeout := Timeout, 
+               type := Type, 
+               pool := Pool, 
+               default_pattern := DefaultPatterns}) ->
     case emqx_auth_redis_cli:q(Pool, Type, AclCmd, ClientInfo, Timeout) of
         {ok, []} -> ok;
+            case match(ClientInfo, PubSub, Topic, DefaultPatterns) of
+                allow   -> {stop, allow};
+                nomatch -> {stop, deny}
+            end;
         {ok, Rules} ->
+            RulesWithDefault = Rules ++ DefaultPatterns,
             case match(ClientInfo, PubSub, Topic, Rules) of
                 allow   -> {stop, allow};
                 nomatch -> {stop, deny}
@@ -72,8 +81,8 @@ match_access(publish, Access) ->
 
 feed_var(#{clientid := ClientId, username := Username}, Str) ->
     lists:foldl(fun({Var, Val}, Acc) ->
-                feed_var(Acc, Var, Val)
-        end, Str, [{"%u", Username}, {"%c", ClientId}]).
+                        feed_var(Acc, Var, Val)
+                end, Str, [{"%u", Username}, {"%c", ClientId}]).
 
 feed_var(Str, _Var, undefined) ->
     Str;

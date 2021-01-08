@@ -128,6 +128,10 @@ end}.
   {datatype, string}
 ]}.
 
+{mapping, "auth.redis.default_pattern", "emqx_auth_redis.default_pattern", [
+  {datatype, string}
+]}.
+
 {translation, "emqx_auth_redis.password_hash", fun(Conf) ->
   HashValue = cuttlefish:conf_get("auth.redis.password_hash", Conf),
   case string:tokens(HashValue, ",") of
