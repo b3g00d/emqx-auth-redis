@@ -68,6 +68,7 @@ do_check_acl(ClientInfo, PubSub, Topic, _AclResult,
 match(_ClientInfo, _PubSub, _Topic, []) ->
     nomatch;
 match(ClientInfo, PubSub, Topic, [Filter, Access | Rules]) ->
+    ?LOG(info, "[Redis] do_check_acl topic ~p, Access ~p Filter ~p Rules ~p", [Topic, Access, Filter, Rules]),
     case {match_topic(Topic, feed_var(ClientInfo, Filter)),
           match_access(PubSub, b2i(Access))} of
         {true, true} -> allow;
