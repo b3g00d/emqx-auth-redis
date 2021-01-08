@@ -46,7 +46,7 @@ do_check_acl(ClientInfo, PubSub, Topic, _AclResult,
                pool := Pool, 
                default_pattern := DefaultPatterns}) ->
     case emqx_auth_redis_cli:q(Pool, Type, AclCmd, ClientInfo, Timeout) of
-        {ok, []} -> ok;
+        {ok, []} ->
             case match(ClientInfo, PubSub, Topic, DefaultPatterns) of
                 allow   -> {stop, allow};
                 nomatch -> {stop, deny}
